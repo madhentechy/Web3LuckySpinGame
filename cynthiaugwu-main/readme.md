@@ -1,8 +1,1 @@
-smooth scrolling ✅
-    attach loco scroll css ✅
-    attach locomotive scroll min js ✅
-    some code from loco github for js ✅
-
-gsap
-    attach gsap
-scrolltrigger
+Make sure you deploy the new.sol solidity contract on Remix IDE first and then use ABI and Aaddress of the contract  
