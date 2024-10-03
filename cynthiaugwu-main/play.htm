@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Spin Game</title>
+    <link rel="stylesheet" href="style1.css">
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h1 id="hahai">Lucky Spin Game</h1>
+	
+	<div class="wrapper">
+		<div class="container">
+		  <canvas id="wheel"></canvas>
+		  <img src="./155564497-removebg-preview.png" alt="spinner arrow" />
+		</div>
+		<div class="buton">
+			<button id="connect">Connect to MetaMask</button>
+			<button id="spin" class="spinn">Spin</button>
+			<p id="result"></p>
+			
+		</div>
+		
+		<div id="final-value">
+		  <p>Connect to Metamask and then <br>Click On The Spin Button To Start</p>
+		</div>
+	</div>
+	
+   
+    <!-- <button id="spin" disabled>Spin the Wheel</button> -->
+    <!-- <p id="result"></p> -->
+
+	<!-- Chart JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- Chart JS Plugin for displaying text over chart -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.1.0/chartjs-plugin-datalabels.min.js"></script>
+    <!-- Script -->
+    <script src="./index.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script>
+
+		function spinning(){
+			document.getElementById('spin').disabled = true;
+		}
+
+		spinning()
+        let web3;
+        let contract;
+
+        async function connectToMetaMask(){
+            if (window.ethereum) {
+                try {
+                    web3 = new Web3(window.ethereum);
+                    await window.ethereum.enable();
+                    const networkId = await web3.eth.net.getId();
+
+                    // Replace with your contract's ABI and address
+                    const contractABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "quote",
+				"type": "string"
+			}
+		],
+		"name": "addQuote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "removeQuote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "cost",
+				"type": "uint256"
+			}
+		],
+		"name": "setSpinCost",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "spin",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "player",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "quote",
+				"type": "string"
+			}
+		],
+		"name": "SpinResult",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "withdrawBalance",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getQuoteCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "motivationalQuotes",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "spinCost",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
+                    const contractAddress = '0x38FF5072069986b720D11E4CD920F5973efc3a7c';
+                    contract = new web3.eth.Contract(contractABI, contractAddress);
+
+                    document.getElementById('spin').disabled = false;
+                } catch (error) {
+                    console.error("Error:", error);
+                }
+            } else {
+                console.error("MetaMask not found. Please install MetaMask extension.");
+            }
+        }
+
+        async function spinWheel() {
+            try {
+                const accounts = await web3.eth.getAccounts();
+                const spinner = accounts[0];
+
+                // Call the 'spin' function of the contract
+                const result = await contract.methods.spin().send({ from: spinner, value: web3.utils.toWei('0.01', 'ether') });
+
+                const quote = result.events.SpinResult.returnValues.quote;
+                document.getElementById('result').textContent = `Your prize : ${quote}`;
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        document.getElementById('connect').addEventListener('click', connectToMetaMask);
+        document.getElementById('spin').addEventListener('click', spinWheel);
+
+		
+    </script>
+</body>
+</html>6
